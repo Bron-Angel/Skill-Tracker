@@ -1,0 +1,1 @@
+const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { console.log('Creating admin user...'); await prisma.user.upsert({ where: { username: 'admin' }, update: {}, create: { username: 'admin', level: 0, experience: 0 } }); console.log('Admin user created!'); } main().catch(console.error).finally(() => prisma.$disconnect());

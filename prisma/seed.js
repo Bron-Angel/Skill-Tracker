@@ -1,4 +1,8 @@
+// This file is deprecated. Please use seed.ts instead.
+// This file is kept for backward compatibility.
+
 const { PrismaClient } = require('@prisma/client');
+const { randomUUID } = require('crypto');
 
 const prisma = new PrismaClient();
 
@@ -26,21 +30,24 @@ async function main() {
   ];
 
   for (const level of levels) {
-    // First check if the level exists
+    // First check if the level already exists
     const existingLevel = await prisma.level.findFirst({
       where: { name: level.name }
     });
 
     if (existingLevel) {
-      // Update if exists
+      // Update existing level
       await prisma.level.update({
         where: { id: existingLevel.id },
         data: level,
       });
     } else {
-      // Create if doesn't exist
+      // Create new level
       await prisma.level.create({
-        data: level,
+        data: {
+          ...level,
+          id: randomUUID(),
+        },
       });
     }
   }
@@ -62,21 +69,24 @@ async function main() {
   ];
 
   for (const skill of skills) {
-    // First check if the skill exists
+    // First check if the skill already exists
     const existingSkill = await prisma.skill.findFirst({
       where: { name: skill.name }
     });
 
     if (existingSkill) {
-      // Update if exists
+      // Update existing skill
       await prisma.skill.update({
         where: { id: existingSkill.id },
         data: skill,
       });
     } else {
-      // Create if doesn't exist
+      // Create new skill
       await prisma.skill.create({
-        data: skill,
+        data: {
+          ...skill,
+          id: randomUUID(),
+        },
       });
     }
   }

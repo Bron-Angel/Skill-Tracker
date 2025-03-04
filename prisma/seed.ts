@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { randomUUID } from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -26,11 +27,26 @@ async function main() {
   ];
 
   for (const level of levels) {
-    await prisma.level.upsert({
-      where: { name: level.name },
-      update: level,
-      create: level,
+    // First check if the level already exists
+    const existingLevel = await prisma.level.findFirst({
+      where: { name: level.name }
     });
+
+    if (existingLevel) {
+      // Update existing level
+      await prisma.level.update({
+        where: { id: existingLevel.id },
+        data: level,
+      });
+    } else {
+      // Create new level
+      await prisma.level.create({
+        data: {
+          ...level,
+          id: randomUUID(),
+        },
+      });
+    }
   }
 
   console.log('Levels created');
@@ -50,11 +66,26 @@ async function main() {
   ];
 
   for (const skill of skills) {
-    await prisma.skill.upsert({
-      where: { name: skill.name },
-      update: skill,
-      create: skill,
+    // First check if the skill already exists
+    const existingSkill = await prisma.skill.findFirst({
+      where: { name: skill.name }
     });
+
+    if (existingSkill) {
+      // Update existing skill
+      await prisma.skill.update({
+        where: { id: existingSkill.id },
+        data: skill,
+      });
+    } else {
+      // Create new skill
+      await prisma.skill.create({
+        data: {
+          ...skill,
+          id: randomUUID(),
+        },
+      });
+    }
   }
 
   console.log('Skills created');
