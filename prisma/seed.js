@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
@@ -26,11 +26,23 @@ async function main() {
   ];
 
   for (const level of levels) {
-    await prisma.level.upsert({
-      where: { name: level.name },
-      update: level,
-      create: level,
+    // First check if the level exists
+    const existingLevel = await prisma.level.findFirst({
+      where: { name: level.name }
     });
+
+    if (existingLevel) {
+      // Update if exists
+      await prisma.level.update({
+        where: { id: existingLevel.id },
+        data: level,
+      });
+    } else {
+      // Create if doesn't exist
+      await prisma.level.create({
+        data: level,
+      });
+    }
   }
 
   console.log('Levels created');
@@ -50,11 +62,23 @@ async function main() {
   ];
 
   for (const skill of skills) {
-    await prisma.skill.upsert({
-      where: { name: skill.name },
-      update: skill,
-      create: skill,
+    // First check if the skill exists
+    const existingSkill = await prisma.skill.findFirst({
+      where: { name: skill.name }
     });
+
+    if (existingSkill) {
+      // Update if exists
+      await prisma.skill.update({
+        where: { id: existingSkill.id },
+        data: skill,
+      });
+    } else {
+      // Create if doesn't exist
+      await prisma.skill.create({
+        data: skill,
+      });
+    }
   }
 
   console.log('Skills created');
@@ -67,4 +91,4 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
-  }); 
+  });

@@ -38,7 +38,7 @@ model Session {
 
 model Level {
   id               String   @id @default(cuid())
-  name             String
+  name             String   @unique
   experienceNeeded Int
   newSkillCount    Int
   createdAt        DateTime @default(now())
@@ -50,7 +50,7 @@ model Level {
 
 model Skill {
   id               String   @id @default(cuid())
-  name             String
+  name             String   @unique
   experienceNeeded Int
   imageUrl         String?
   createdAt        DateTime @default(now())

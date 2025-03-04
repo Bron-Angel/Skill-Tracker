@@ -1,20 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create admin user
-  const adminUser = await prisma.user.upsert({
-    where: { username: 'admin' },
-    update: {},
-    create: {
-      username: 'admin',
-      level: 0,
-      experience: 0,
-    },
-  });
-
-  console.log('Admin user created:', adminUser);
+  console.log('Starting data backfill...');
 
   // Create levels
   const levels = [
@@ -25,15 +14,28 @@ async function main() {
     { name: 'Level 5', experienceNeeded: 10, newSkillCount: 2 },
   ];
 
+  console.log('Creating levels...');
   for (const level of levels) {
-    await prisma.level.upsert({
-      where: { name: level.name },
-      update: level,
-      create: level,
+    // First check if the level exists
+    const existingLevel = await prisma.level.findFirst({
+      where: { name: level.name }
     });
-  }
 
-  console.log('Levels created');
+    if (existingLevel) {
+      // Update if exists
+      await prisma.level.update({
+        where: { id: existingLevel.id },
+        data: level,
+      });
+      console.log(`Updated level: ${level.name}`);
+    } else {
+      // Create if doesn't exist
+      const createdLevel = await prisma.level.create({
+        data: level,
+      });
+      console.log(`Created level: ${level.name} with ID: ${createdLevel.id}`);
+    }
+  }
 
   // Create skills
   const skills = [
@@ -49,22 +51,37 @@ async function main() {
     { name: 'Garbage Can', experienceNeeded: 4, imageUrl: '/images/skills/placeholder.png' },
   ];
 
+  console.log('Creating skills...');
   for (const skill of skills) {
-    await prisma.skill.upsert({
-      where: { name: skill.name },
-      update: skill,
-      create: skill,
+    // First check if the skill exists
+    const existingSkill = await prisma.skill.findFirst({
+      where: { name: skill.name }
     });
+
+    if (existingSkill) {
+      // Update if exists
+      await prisma.skill.update({
+        where: { id: existingSkill.id },
+        data: skill,
+      });
+      console.log(`Updated skill: ${skill.name}`);
+    } else {
+      // Create if doesn't exist
+      const createdSkill = await prisma.skill.create({
+        data: skill,
+      });
+      console.log(`Created skill: ${skill.name} with ID: ${createdSkill.id}`);
+    }
   }
 
-  console.log('Skills created');
+  console.log('Data backfill completed successfully!');
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error('Error during data backfill:', e);
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
-  }); 
+  });
