@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // User progress
+  level     Int      @default(0)
+  experience Int     @default(0)
+  
+  // User's skill tree configuration
+  skillTreeConfig UserSkillTreeConfig[]
+  
+  // Session
+  sessions  Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Level {
+  id               String   @id @default(cuid())
+  name             String
+  experienceNeeded Int
+  newSkillCount    Int
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Level's skill tree configurations
+  skillTreeConfigs UserSkillTreeConfig[]
+}
+
+model Skill {
+  id               String   @id @default(cuid())
+  name             String
+  experienceNeeded Int
+  imageUrl         String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Skill's tree configurations
+  skillTreeConfigs UserSkillTreeConfig[]
+}
+
+model UserSkillTreeConfig {
+  id        String   @id @default(cuid())
+  userId    String
+  levelId   String
+  skillId   String
+  position  Int      // Position of the skill in the level
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level     Level    @relation(fields: [levelId], references: [id], onDelete: Cascade)
+  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, levelId, position])
+  @@unique([userId, skillId])
+} 

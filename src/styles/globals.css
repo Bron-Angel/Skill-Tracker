@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+}
+
+.experience-bar {
+  height: 24px;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #f0f0f0;
+  position: relative;
+}
+
+.experience-fill {
+  height: 100%;
+  background-color: theme('colors.primary');
+  transition: width 0.5s ease-in-out;
+}
+
+.experience-fill.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+  background-image: linear-gradient(90deg, #FF9500, #FFB347, #FF9500);
+  background-size: 200% 100%;
+  background-position: 0 0;
+}
+
+.skill-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+  transition: all 0.3s ease;
+}
+
+.skill-unlocked {
+  filter: grayscale(0);
+}
+
+.skill-locked {
+  filter: grayscale(100%);
+  opacity: 0.6;
+}
+
+.skill-glow {
+  position: relative;
+}
+
+.skill-glow::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border-radius: 12px;
+  background: linear-gradient(45deg, #FF9500, #FFB347, #FF9500);
+  z-index: -1;
+  animation: glow 2s ease-in-out infinite;
+}
+
+.draggable-skill {
+  cursor: grab;
+}
+
+.draggable-skill:active {
+  cursor: grabbing;
+} 
