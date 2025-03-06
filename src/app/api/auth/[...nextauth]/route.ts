@@ -5,6 +5,18 @@ import { PrismaAdapter } from '@auth/prisma-adapter';
 
 const prisma = new PrismaClient();
 
+// Add this type declaration before your NextAuth configuration
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    }
+  }
+}
+
 const handler = NextAuth({
   adapter: PrismaAdapter(prisma) as any,
   providers: [
