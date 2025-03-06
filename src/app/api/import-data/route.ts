@@ -26,7 +26,10 @@ export async function POST() {
   } catch (error) {
     console.error('Error importing test data:', error);
     return NextResponse.json(
-      { error: 'Failed to import test data', details: error.message },
+      { 
+        error: 'Failed to import test data', 
+        details: error instanceof Error ? error.message : 'Unknown error' 
+      },
       { status: 500 }
     );
   }
