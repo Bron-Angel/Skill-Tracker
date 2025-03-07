@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Level 1",
+    "experienceNeeded": 10,
+    "newSkillCount": 2,
+    "id": "66a8c7c3-3a75-468b-a5be-20521e92fea9"
+  },
+  {
+    "name": "Level 2",
+    "experienceNeeded": 10,
+    "newSkillCount": 2,
+    "id": "8f13e049-4ac8-4d3e-9d5c-d0536566f762"
+  },
+  {
+    "name": "Level 3",
+    "experienceNeeded": 10,
+    "newSkillCount": 2,
+    "id": "a5d76bfc-6701-433d-8292-ba6515a3b734"
+  },
+  {
+    "name": "Level 4",
+    "experienceNeeded": 10,
+    "newSkillCount": 2,
+    "id": "c1805d5b-f207-484a-8b0f-c6cf3ab4ea3c"
+  },
+  {
+    "name": "Level 5",
+    "experienceNeeded": 10,
+    "newSkillCount": 2,
+    "id": "8941fc8a-ef40-4be0-9ac0-a2bde026b4f4"
+  }
+]

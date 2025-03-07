@@ -17,9 +17,6 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma client
-RUN npx prisma generate
-
 # Build the Next.js application
 RUN npm run build
 
@@ -35,10 +32,10 @@ RUN adduser --system --uid 1001 nextjs
 
 # Copy necessary files from builder
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/scripts ./scripts
+COPY --from=builder /app/data ./data
 COPY --from=builder /app/package.json ./package.json
 
 # Set proper permissions
@@ -49,7 +46,6 @@ EXPOSE 3000
 
 # Environment variables must be provided at runtime
 ENV PORT 3000
-ENV DATABASE_URL "file:./dev.db"
 
 # Start the application
 CMD ["node", "server.js"] 

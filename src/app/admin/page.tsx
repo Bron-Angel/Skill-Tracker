@@ -15,7 +15,7 @@ interface Skill {
   id: string;
   name: string;
   experienceNeeded: number;
-  imageUrl: string;
+  emoji: string;
 }
 
 export default function AdminPage() {
@@ -40,7 +40,7 @@ export default function AdminPage() {
   const [newSkill, setNewSkill] = useState({
     name: '',
     experienceNeeded: 4,
-    imageUrl: '',
+    emoji: '❓',
   });
 
   useEffect(() => {
@@ -173,7 +173,7 @@ export default function AdminPage() {
       setNewSkill({
         name: '',
         experienceNeeded: 4,
-        imageUrl: '',
+        emoji: '❓',
       });
     } catch (err) {
       setError('Failed to create skill. Please try again.');
@@ -550,19 +550,19 @@ export default function AdminPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                      Image URL
+                    <label htmlFor="emoji" className="block text-sm font-medium text-gray-700 mb-1">
+                      Emoji
                     </label>
                     <input
                       type="text"
-                      id="imageUrl"
-                      value={newSkill.imageUrl}
-                      onChange={(e) => setNewSkill({ ...newSkill, imageUrl: e.target.value })}
+                      id="emoji"
+                      value={newSkill.emoji}
+                      onChange={(e) => setNewSkill({ ...newSkill, emoji: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                      placeholder="/images/skills/skill-name.png"
+                      placeholder="🔍"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Leave blank to use a placeholder image
+                      Enter an emoji to represent this skill
                     </p>
                   </div>
                   <button
@@ -609,19 +609,19 @@ export default function AdminPage() {
                       />
                     </div>
                     <div>
-                      <label htmlFor="editImageUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                        Image URL
+                      <label htmlFor="editEmoji" className="block text-sm font-medium text-gray-700 mb-1">
+                        Emoji
                       </label>
                       <input
                         type="text"
-                        id="editImageUrl"
-                        value={editingSkill.imageUrl}
-                        onChange={(e) => setEditingSkill({ ...editingSkill, imageUrl: e.target.value })}
+                        id="editEmoji"
+                        value={editingSkill.emoji}
+                        onChange={(e) => setEditingSkill({ ...editingSkill, emoji: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                        placeholder="/images/skills/skill-name.png"
+                        placeholder="🔍"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Leave blank to use a placeholder image
+                        Enter an emoji to represent this skill
                       </p>
                     </div>
                     <div className="flex gap-2">
@@ -655,7 +655,7 @@ export default function AdminPage() {
                         Experience Needed
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Image
+                        Emoji
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
@@ -675,15 +675,7 @@ export default function AdminPage() {
                           <td className="px-6 py-4 whitespace-nowrap">{skill.name}</td>
                           <td className="px-6 py-4 whitespace-nowrap">{skill.experienceNeeded} XP</td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            {skill.imageUrl ? (
-                              <img
-                                src={skill.imageUrl}
-                                alt={skill.name}
-                                className="h-10 w-10 rounded-md object-cover"
-                              />
-                            ) : (
-                              <span className="text-gray-500">No image</span>
-                            )}
+                            <span className="text-4xl">{skill.emoji}</span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <button

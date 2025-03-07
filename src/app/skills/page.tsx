@@ -9,7 +9,7 @@ interface Skill {
   id: string;
   name: string;
   experienceNeeded: number;
-  imageUrl: string;
+  emoji: string;
   isUnlocked: boolean;
 }
 
@@ -30,16 +30,19 @@ export default function SkillsPage() {
 
   const fetchUserSkills = async () => {
     setIsLoading(true);
+    setError('');
     try {
+      console.log('Fetching user skills...');
       const response = await fetch('/api/user/skills');
       if (!response.ok) {
         throw new Error('Failed to fetch user skills');
       }
       const data = await response.json();
+      console.log('User skills data:', data);
       setSkills(data.skills);
     } catch (err) {
+      console.error('Error fetching user skills:', err);
       setError('Failed to load your skills. Please try again.');
-      console.error(err);
     } finally {
       setIsLoading(false);
     }
@@ -71,16 +74,23 @@ export default function SkillsPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {skills.map((skill) => (
-              <SkillItem
-                key={skill.id}
-                name={skill.name}
-                imageUrl={skill.imageUrl}
-                experienceNeeded={skill.experienceNeeded}
-                isUnlocked={skill.isUnlocked}
-              />
-            ))}
+          <div>
+            <div className="mb-6">
+              <p className="text-sm text-gray-600">
+                Total Skills: {skills.length} | Unlocked: {skills.filter(s => s.isUnlocked).length}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              {skills.map((skill) => (
+                <SkillItem
+                  key={skill.id}
+                  name={skill.name}
+                  emoji={skill.emoji}
+                  experienceNeeded={skill.experienceNeeded}
+                  isUnlocked={skill.isUnlocked}
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>

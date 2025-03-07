@@ -1,9 +1,6 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { PrismaClient } from '@prisma/client';
-import { PrismaAdapter } from '@auth/prisma-adapter';
-
-const prisma = new PrismaClient();
+import { db } from '@/lib/jsonDb';
 
 // Add this type declaration before your NextAuth configuration
 declare module "next-auth" {
@@ -18,7 +15,6 @@ declare module "next-auth" {
 }
 
 const handler = NextAuth({
-  adapter: PrismaAdapter(prisma) as any,
   providers: [
     CredentialsProvider({
       name: 'Username',
@@ -31,28 +27,18 @@ const handler = NextAuth({
         }
 
         // Find or create user by username
-        let user = await prisma.user.findUnique({
-          where: { username: credentials.username },
+        let user = await db.user.findUnique({
+          username: credentials.username,
         });
 
         if (!user) {
           // Create a new user if they don't exist
-          user = await prisma.user.create({
-            data: {
-              username: credentials.username,
-              level: 0,
-              experience: 0,
-            },
+          user = await db.user.create({
+            username: credentials.username,
+            level: 0,
+            experience: 0,
           });
         }
-
-        // Create a new session for the user
-        await prisma.session.create({
-          data: {
-            userId: user.id,
-            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-          },
-        });
 
         return {
           id: user.id,

@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Clean chairs",
+    "experienceNeeded": 4,
+    "emoji": "🪑",
+    "id": "03292263-14c0-4253-9aa0-55d58d279554"
+  },
+  {
+    "name": "Water plants",
+    "experienceNeeded": 4,
+    "emoji": "🌱",
+    "id": "5883f6c9-ba3b-4be3-a430-486221341975"
+  },
+  {
+    "name": "Doors",
+    "experienceNeeded": 4,
+    "emoji": "🚪",
+    "id": "2dc4b6d0-2e55-437e-920c-dc941455c77f"
+  },
+  {
+    "name": "Edges",
+    "experienceNeeded": 4,
+    "emoji": "📏",
+    "id": "51ab8764-a67e-4802-ac52-e9395d2eb60c"
+  },
+  {
+    "name": "Clean Counters",
+    "experienceNeeded": 4,
+    "emoji": "🧼",
+    "id": "59d8d3b7-67ae-40be-8109-f973498159a3"
+  },
+  {
+    "name": "Vacuum",
+    "experienceNeeded": 4,
+    "emoji": "🔌",
+    "id": "3f29650e-ea4d-4d5d-9d5e-bfec9e37ba6f"
+  },
+  {
+    "name": "Sweep",
+    "experienceNeeded": 4,
+    "emoji": "🧹",
+    "id": "ebb2e6f5-6879-47af-ae7a-7ab7d32e5d10"
+  },
+  {
+    "name": "Mop",
+    "experienceNeeded": 4,
+    "emoji": "🧑‍🦯",
+    "id": "bb463020-2ac6-44ef-8aaf-70ab17eaee59"
+  },
+  {
+    "name": "Put away dishes",
+    "experienceNeeded": 4,
+    "emoji": "🍽️",
+    "id": "ce0644bf-622d-4ad8-8063-3f9b9f17cb5c"
+  },
+  {
+    "name": "Garbages",
+    "experienceNeeded": 4,
+    "emoji": "🗑️",
+    "id": "6edb8d37-687d-4958-a507-6ff115b0cbd4"
+  }
+]

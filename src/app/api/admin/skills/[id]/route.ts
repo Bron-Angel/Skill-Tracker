@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { db } from '@/lib/jsonDb';
 
 export async function PUT(
   request: NextRequest,
@@ -16,20 +14,20 @@ export async function PUT(
     }
 
     const { id } = params;
-    const { name, experienceNeeded, imageUrl } = await request.json();
+    const { name, experienceNeeded, emoji } = await request.json();
 
     if (!name || typeof experienceNeeded !== 'number') {
       return NextResponse.json({ error: 'Invalid skill data' }, { status: 400 });
     }
 
-    const skill = await prisma.skill.update({
-      where: { id },
-      data: {
+    const skill = await db.skill.update(
+      { id },
+      {
         name,
         experienceNeeded,
-        imageUrl: imageUrl || null,
-      },
-    });
+        emoji: emoji || '❓',
+      }
+    );
 
     return NextResponse.json({ skill });
   } catch (error) {
@@ -51,15 +49,8 @@ export async function DELETE(
 
     const { id } = params;
 
-    // Delete all skill tree configurations for this skill
-    await prisma.userSkillTreeConfig.deleteMany({
-      where: { skillId: id },
-    });
-
     // Delete the skill
-    await prisma.skill.delete({
-      where: { id },
-    });
+    await db.skill.delete({ id });
 
     return NextResponse.json({ success: true });
   } catch (error) {

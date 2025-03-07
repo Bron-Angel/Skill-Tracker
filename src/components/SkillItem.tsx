@@ -2,7 +2,7 @@
 
 interface SkillItemProps {
   name: string;
-  imageUrl: string;
+  emoji: string;
   experienceNeeded: number;
   isUnlocked: boolean;
   isDraggable?: boolean;
@@ -11,7 +11,7 @@ interface SkillItemProps {
 
 export function SkillItem({
   name,
-  imageUrl,
+  emoji,
   experienceNeeded,
   isUnlocked,
   isDraggable = false,
@@ -24,13 +24,15 @@ export function SkillItem({
       } ${isUnlocked ? 'skill-glow' : ''}`}
       draggable={isDraggable}
       onDragStart={onDragStart}
+      data-skill-name={name}
+      data-skill-emoji={emoji}
+      data-skill-xp={experienceNeeded}
+      data-skill-unlocked={isUnlocked ? 'true' : 'false'}
     >
       <div className="relative mb-2">
-        <img
-          src={imageUrl || '/images/skills/placeholder.png'}
-          alt={name}
-          className={`skill-image ${isUnlocked ? 'skill-unlocked' : 'skill-locked'}`}
-        />
+        <div className={`skill-emoji ${isUnlocked ? 'skill-unlocked' : 'skill-locked'}`}>
+          <span className="text-4xl">{emoji || '❓'}</span>
+        </div>
         <div className="absolute bottom-0 right-0 bg-blue-600 text-white text-xs px-1 rounded-tl-md">
           {experienceNeeded} XP
         </div>

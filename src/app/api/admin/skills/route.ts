@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { db } from '@/lib/jsonDb';
 
 export async function GET() {
   try {
@@ -12,9 +10,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const skills = await prisma.skill.findMany({
-      orderBy: { name: 'asc' },
-    });
+    const skills = await db.skill.findMany();
 
     return NextResponse.json({ skills });
   } catch (error) {
@@ -31,18 +27,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, experienceNeeded, imageUrl } = await request.json();
+    const { name, experienceNeeded, emoji } = await request.json();
 
     if (!name || typeof experienceNeeded !== 'number') {
       return NextResponse.json({ error: 'Invalid skill data' }, { status: 400 });
     }
 
-    const skill = await prisma.skill.create({
-      data: {
-        name,
-        experienceNeeded,
-        imageUrl: imageUrl || null,
-      },
+    const skill = await db.skill.create({
+      name,
+      experienceNeeded,
+      emoji: emoji || '❓',
     });
 
     return NextResponse.json({ skill });
