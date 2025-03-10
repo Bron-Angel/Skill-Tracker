@@ -28,9 +28,7 @@ async function main() {
 
   for (const level of levels) {
     // First check if the level already exists
-    const existingLevel = await db.level.findFirst({
-      where: { name: level.name }
-    });
+    const existingLevel = await db.level.findFirst({ name: level.name });
 
     if (existingLevel) {
       // Update existing level
@@ -50,23 +48,21 @@ async function main() {
 
   // Create skills
   const skills = [
-    { name: 'Clean chairs', experienceNeeded: 4, imageUrl: '/images/skills/placeholder.png' },
-    { name: 'Water plants', experienceNeeded: 4, imageUrl: '/images/skills/placeholder.png' },
-    { name: 'Doors', experienceNeeded: 4, imageUrl: '/images/skills/placeholder.png' },
-    { name: 'Edges', experienceNeeded: 4, imageUrl: '/images/skills/placeholder.png' },
-    { name: 'Clean Counters', experienceNeeded: 4, imageUrl: '/images/skills/placeholder.png' },
-    { name: 'Vacuum', experienceNeeded: 4, imageUrl: '/images/skills/placeholder.png' },
-    { name: 'Sweep', experienceNeeded: 4, imageUrl: '/images/skills/placeholder.png' },
-    { name: 'Mop', experienceNeeded: 4, imageUrl: '/images/skills/placeholder.png' },
-    { name: 'Put away dishes', experienceNeeded: 4, imageUrl: '/images/skills/placeholder.png' },
-    { name: 'Garbage Can', experienceNeeded: 4, imageUrl: '/images/skills/placeholder.png' },
+    { name: 'Clean chairs', experienceNeeded: 4, emoji: '🪑' },
+    { name: 'Water plants', experienceNeeded: 4, emoji: '🌱' },
+    { name: 'Doors', experienceNeeded: 4, emoji: '🚪' },
+    { name: 'Edges', experienceNeeded: 4, emoji: '📏' },
+    { name: 'Clean Counters', experienceNeeded: 4, emoji: '🧼' },
+    { name: 'Vacuum', experienceNeeded: 4, emoji: '🧹' },
+    { name: 'Sweep', experienceNeeded: 4, emoji: '🧹' },
+    { name: 'Mop', experienceNeeded: 4, emoji: '🧽' },
+    { name: 'Put away dishes', experienceNeeded: 4, emoji: '🍽️' },
+    { name: 'Garbage Can', experienceNeeded: 4, emoji: '🗑️' },
   ];
 
   for (const skill of skills) {
     // First check if the skill already exists
-    const existingSkill = await db.skill.findFirst({
-      where: { name: skill.name }
-    });
+    const existingSkill = await db.skill.findFirst({ name: skill.name });
 
     if (existingSkill) {
       // Update existing skill
