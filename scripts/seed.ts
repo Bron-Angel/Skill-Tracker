@@ -32,15 +32,13 @@ async function main() {
 
     if (existingLevel) {
       // Update existing level
-      await db.level.update({
-        where: { id: existingLevel.id },
-        data: level,
-      });
+      await db.level.update(
+        { id: existingLevel.id },
+        level
+      );
     } else {
       // Create new level
-      await db.level.create({
-        data: level,
-      });
+      await db.level.create(level);
     }
   }
 
@@ -66,15 +64,13 @@ async function main() {
 
     if (existingSkill) {
       // Update existing skill
-      await db.skill.update({
-        where: { id: existingSkill.id },
-        data: skill,
-      });
+      await db.skill.update(
+        { id: existingSkill.id },
+        skill
+      );
     } else {
       // Create new skill
-      await db.skill.create({
-        data: skill,
-      });
+      await db.skill.create(skill);
     }
   }
 
