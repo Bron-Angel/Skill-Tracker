@@ -6,16 +6,15 @@ interface ExperienceBarProps {
 }
 
 export function ExperienceBar({ currentExperience, experienceNeeded }: ExperienceBarProps) {
-  const percentage = Math.min((currentExperience / experienceNeeded) * 100, 100);
+  // Handle edge cases:
+  // 1. If experienceNeeded is 0 or negative, show 0% progress
+  // 2. Ensure percentage is between 0 and 100
+  const percentage = experienceNeeded <= 0 ? 
+    0 : 
+    Math.min(Math.max(0, (currentExperience / experienceNeeded) * 100), 100);
 
   return (
-    <div className="w-full mb-6">
-      <div className="flex justify-between mb-2">
-        <span className="text-sm font-medium text-gray-700">
-          {currentExperience} / {experienceNeeded} XP
-        </span>
-        <span className="text-sm font-medium text-gray-700">{percentage.toFixed(0)}%</span>
-      </div>
+    <div className="w-full mb-2">
       <div className="experience-bar">
         <div 
           className="experience-fill animate-glow" 

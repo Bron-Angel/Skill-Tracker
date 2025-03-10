@@ -39,6 +39,25 @@ export type Session = {
   expiresAt: Date;
 };
 
+// Define the UserSkillTreeConfig type
+export type UserSkillTreeConfig = {
+  id: string;
+  userId: string;
+  levelId: string;
+  skillId: string;
+  position: number;
+};
+
+// Define the SkillTreeConfig type for the transformed data structure
+export type SkillTreeConfig = {
+  username: string;
+  levels: {
+    id: string;
+    name: string;
+    skills: string[];
+  }[];
+};
+
 // Add this function to completely reset a file
 export async function resetFile(filePath: string, defaultContent: string = '[]'): Promise<void> {
   try {
@@ -303,10 +322,78 @@ export const sessionDb = {
   },
 };
 
-// Export a db object that mimics Prisma client structure
+// SkillTreeConfig operations
+export const skillTreeConfigDb = {
+  findUnique: async ({ username }: { username: string }): Promise<SkillTreeConfig | null> => {
+    try {
+      // Read the user skill tree config file
+      const userSkillTreeConfigPath = path.join(DATA_DIR, 'userSkillTreeConfig.json');
+      
+      try {
+        await fs.access(userSkillTreeConfigPath);
+      } catch {
+        // If file doesn't exist, return null
+        return null;
+      }
+      
+      const data = await fs.readFile(userSkillTreeConfigPath, 'utf-8');
+      const configs: UserSkillTreeConfig[] = JSON.parse(data);
+      
+      // Get the user ID
+      const user = await userDb.findUnique({ username });
+      if (!user) return null;
+      
+      // Filter configs for this user
+      const userConfigs = configs.filter(config => config.userId === user.id);
+      if (userConfigs.length === 0) return null;
+      
+      // Get all levels
+      const levels = await levelDb.findMany();
+      
+      // Transform the data into the expected format
+      const result: SkillTreeConfig = {
+        username,
+        levels: []
+      };
+      
+      // Group skills by level
+      const levelMap = new Map<string, string[]>();
+      
+      for (const config of userConfigs) {
+        if (!levelMap.has(config.levelId)) {
+          levelMap.set(config.levelId, []);
+        }
+        
+        const skills = levelMap.get(config.levelId);
+        if (skills) {
+          skills.push(config.skillId);
+        }
+      }
+      
+      // Create the levels array
+      for (const level of levels) {
+        const skills = levelMap.get(level.id) || [];
+        
+        result.levels.push({
+          id: level.id,
+          name: level.name,
+          skills
+        });
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Error finding skill tree config:', error);
+      return null;
+    }
+  }
+};
+
+// Export the database object
 export const db = {
   user: userDb,
   level: levelDb,
   skill: skillDb,
   session: sessionDb,
+  skillTreeConfig: skillTreeConfigDb
 }; 

@@ -52,6 +52,12 @@ body {
   transition: all 0.3s ease;
 }
 
+/* Special class for Skill Tree page - always show emojis in full color */
+.skill-tree-emoji {
+  filter: grayscale(0) !important;
+  opacity: 1 !important;
+}
+
 .skill-unlocked {
   filter: grayscale(0);
 }
@@ -122,6 +128,17 @@ body.dragging [id^="level-placeholder-"],
 body.dragging [id="unassigned-placeholder"] {
   background-color: rgba(59, 130, 246, 0.1);
   border-color: rgba(59, 130, 246, 0.5);
+}
+
+/* Mode-specific styles */
+body[data-mode="plan"] #unassigned-container {
+  border: 2px solid rgba(59, 130, 246, 0.5);
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+body[data-mode="assign"] [id^="level-container-"] {
+  border: 2px solid rgba(34, 197, 94, 0.5);
+  background-color: rgba(34, 197, 94, 0.05);
 }
 
 @keyframes glow {
