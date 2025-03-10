@@ -95,7 +95,7 @@ export default function SkillTreePage() {
       // Combine all skills for dropdown options
       const allSkillsArray = [
         ...data.unassignedSkills,
-        ...data.levels.flatMap(level => level.skills)
+        ...data.levels.flatMap((level: Level) => level.skills)
       ];
       setAllSkills(allSkillsArray);
       
@@ -193,11 +193,11 @@ export default function SkillTreePage() {
     setSaveSuccess(false);
 
     try {
-      const skillTreeConfig = levels.flatMap((level) =>
-        level.skills.map((skill, index) => ({
+      const skillTreeConfig = levels.flatMap((level: Level) =>
+        level.skills.map((skill) => ({
           levelId: level.id,
           skillId: skill.id,
-          position: index,
+          position: level.skills.indexOf(skill),
         }))
       );
 
@@ -326,7 +326,7 @@ export default function SkillTreePage() {
               <p className="text-gray-600">No levels available.</p>
             ) : (
               <div className="space-y-8">
-                {levels.map((level) => (
+                {levels.map((level: Level) => (
                   <div key={level.id} className="border rounded-lg p-4">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-medium">{level.name}</h3>
@@ -339,7 +339,7 @@ export default function SkillTreePage() {
                       {/* Render existing skills */}
                       {level.skills.length > 0 && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                          {level.skills.map((skill, index) => (
+                          {level.skills.map((skill: Skill, index: number) => (
                             <div key={skill.id} className="flex items-center bg-gray-50 p-3 rounded-md">
                               <div className="flex-grow">
                                 <SkillTreeItem
@@ -366,7 +366,7 @@ export default function SkillTreePage() {
                       {/* Render empty skill slots with dropdowns */}
                       {level.skills.length < level.newSkillCount && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {Array.from({ length: level.newSkillCount - level.skills.length }).map((_, index) => (
+                          {Array.from({ length: level.newSkillCount - level.skills.length }).map((_, index: number) => (
                             <div key={`empty-${index}`} className="border-2 border-dashed border-gray-300 p-3 rounded-md">
                               <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Assign skill to slot {level.skills.length + index + 1}
@@ -377,7 +377,7 @@ export default function SkillTreePage() {
                                 value=""
                               >
                                 <option value="">Select a skill</option>
-                                {unassignedSkills.map((skill) => (
+                                {unassignedSkills.map((skill: Skill) => (
                                   <option key={skill.id} value={skill.id}>
                                     {skill.emoji} {skill.name} ({skill.experienceNeeded} XP)
                                   </option>
@@ -406,7 +406,7 @@ export default function SkillTreePage() {
               {unassignedSkills.length === 0 ? (
                 <p className="text-gray-500 text-center py-4">No unassigned skills available.</p>
               ) : (
-                unassignedSkills.map((skill) => (
+                unassignedSkills.map((skill: Skill) => (
                   <div key={skill.id} className="bg-gray-50 p-3 rounded-md">
                     <SkillTreeItem
                       name={skill.name}
@@ -429,7 +429,7 @@ export default function SkillTreePage() {
                         value=""
                       >
                         <option value="">Select a level</option>
-                        {levels.map((level) => {
+                        {levels.map((level: Level) => {
                           // Only show levels that have available slots
                           if (level.skills.length < level.newSkillCount) {
                             return (
