@@ -72,6 +72,15 @@ function calculateCumulativeSkillExperience(skills: any[], levelStartExperience:
   });
 }
 
+// Define the UserSkillTreeConfig type
+interface UserSkillTreeConfig {
+  id: string;
+  userId: string;
+  levelId: string;
+  skillId: string;
+  position: number;
+}
+
 export async function GET() {
   try {
     const session = await getServerSession();
@@ -105,7 +114,7 @@ export async function GET() {
     // Get user's skill tree configuration
     // Read from the userSkillTreeConfig.json file
     const userSkillTreeConfigPath = path.join(process.cwd(), 'data', 'userSkillTreeConfig.json');
-    let userSkillTreeConfig = [];
+    let userSkillTreeConfig: UserSkillTreeConfig[] = [];
     
     try {
       const configData = await fs.readFile(userSkillTreeConfigPath, 'utf-8');
@@ -217,11 +226,13 @@ export async function GET() {
     if (userId && nextLevelObj) {
       // Filter user's skill tree config for the next level
       const nextLevelConfigs = userSkillTreeConfig.filter(
-        config => config.userId === userId && config.levelId === nextLevelObj.id
+        (config: UserSkillTreeConfig) => config.userId === userId && config.levelId === nextLevelObj.id
       );
       
       // Sort configs by position to maintain the correct order
-      const sortedConfigs = nextLevelConfigs.sort((a, b) => a.position - b.position);
+      const sortedConfigs = nextLevelConfigs.sort(
+        (a: UserSkillTreeConfig, b: UserSkillTreeConfig) => a.position - b.position
+      );
       
       // Get the skill IDs for the next level in the correct order
       const nextLevelSkillIds = sortedConfigs.map(config => config.skillId);
@@ -358,7 +369,7 @@ export async function POST(request: NextRequest) {
     // Get user's skill tree configuration
     // Read from the userSkillTreeConfig.json file
     const userSkillTreeConfigPath = path.join(process.cwd(), 'data', 'userSkillTreeConfig.json');
-    let userSkillTreeConfig = [];
+    let userSkillTreeConfig: UserSkillTreeConfig[] = [];
     
     try {
       const configData = await fs.readFile(userSkillTreeConfigPath, 'utf-8');
@@ -381,11 +392,13 @@ export async function POST(request: NextRequest) {
     if (userId && nextLevelObj) {
       // Filter user's skill tree config for the next level
       const nextLevelConfigs = userSkillTreeConfig.filter(
-        config => config.userId === userId && config.levelId === nextLevelObj.id
+        (config: UserSkillTreeConfig) => config.userId === userId && config.levelId === nextLevelObj.id
       );
       
       // Sort configs by position to maintain the correct order
-      const sortedConfigs = nextLevelConfigs.sort((a, b) => a.position - b.position);
+      const sortedConfigs = nextLevelConfigs.sort(
+        (a: UserSkillTreeConfig, b: UserSkillTreeConfig) => a.position - b.position
+      );
       
       // Get the skill IDs for the next level in the correct order
       const nextLevelSkillIds = sortedConfigs.map(config => config.skillId);
