@@ -10,7 +10,9 @@ interface Skill {
   id: string;
   name: string;
   experienceNeeded: number;
-  imageUrl: string;
+  cumulativeExperienceNeeded: number;
+  emoji: string;
+  isUnlocked: boolean;
 }
 
 interface Level {
@@ -25,6 +27,13 @@ interface UserProgress {
   totalExperienceForNextLevel: number;
   unlockedSkills: Skill[];
   skillsToUnlock: Skill[];
+  skills: Skill[];
+  nextLevel: number | null;
+  levelProgress: {
+    expInCurrentLevel: number;
+    expNeededForNextLevel: number;
+    progressPercentage: number;
+  };
 }
 
 export default function ProgressPage() {
@@ -46,16 +55,19 @@ export default function ProgressPage() {
 
   const fetchUserProgress = async () => {
     setIsLoading(true);
+    setError('');
     try {
       const response = await fetch('/api/user/progress');
       if (!response.ok) {
-        throw new Error('Failed to fetch user progress');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch user progress');
       }
       const data = await response.json();
+      console.log('Progress data:', data);
       setProgress(data);
-    } catch (err) {
-      setError('Failed to load your progress. Please try again.');
-      console.error(err);
+    } catch (err: any) {
+      console.error('Error fetching progress:', err);
+      setError(`Failed to load your progress: ${err.message || 'Unknown error'}`);
     } finally {
       setIsLoading(false);
     }
@@ -65,8 +77,8 @@ export default function ProgressPage() {
     e.preventDefault();
     
     const expPoints = parseInt(experienceInput);
-    if (isNaN(expPoints) || expPoints <= 0) {
-      setError('Please enter a valid positive number');
+    if (isNaN(expPoints)) {
+      setError('Please enter a valid number');
       return;
     }
 
@@ -83,15 +95,15 @@ export default function ProgressPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update progress');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update progress');
       }
 
-      const data = await response.json();
-      setProgress(data);
+      await fetchUserProgress();
       setExperienceInput('');
-    } catch (err) {
-      setError('Failed to update your progress. Please try again.');
-      console.error(err);
+    } catch (err: any) {
+      console.error('Error updating progress:', err);
+      setError(`Failed to update your progress: ${err.message || 'Unknown error'}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -118,20 +130,42 @@ export default function ProgressPage() {
     <div className="max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6 text-center">Current Progress</h1>
       
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+      
       <div className="bg-white p-6 rounded-lg shadow-md mb-8">
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">Level {progress.level}</h2>
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-xl font-semibold">Level {progress.level}</h2>
+            <span className="text-sm font-medium text-gray-600">
+              Total XP: {progress.experience}
+            </span>
+          </div>
+          
+          <div className="flex justify-between text-sm text-gray-600 mb-1">
+            <span>Progress to Level {progress.nextLevel}</span>
+            <span>{progress.levelProgress.expInCurrentLevel} / {progress.levelProgress.expNeededForNextLevel} XP</span>
+          </div>
+          
           <ExperienceBar 
-            currentExperience={progress.experience} 
-            experienceNeeded={progress.totalExperienceForNextLevel} 
+            currentExperience={progress.levelProgress.expInCurrentLevel} 
+            experienceNeeded={progress.levelProgress.expNeededForNextLevel} 
           />
+          
+          <p className="text-xs text-gray-500 mt-1">
+            {progress.levelProgress.progressPercentage.toFixed(0)}% complete - 
+            {progress.levelProgress.expNeededForNextLevel - progress.levelProgress.expInCurrentLevel} XP needed for Level {progress.nextLevel}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="mb-8">
           <div className="flex flex-col md:flex-row gap-4 items-end">
             <div className="flex-grow">
               <label htmlFor="experienceInput" className="block text-gray-700 font-medium mb-2">
-                Add Experience Points
+                Update Experience Points
               </label>
               <input
                 type="number"
@@ -140,11 +174,11 @@ export default function ProgressPage() {
                 onChange={(e) => setExperienceInput(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter experience points"
-                min="1"
                 disabled={isSubmitting}
               />
               <p className="text-sm text-gray-500 mt-1">
-                1 exp pt = 1 chore, 1 practice session, or 1 lesson
+                Enter a positive value to add experience points or a negative value to remove experience points.
+                Removing points may reverse unlocked skills and levels.
               </p>
             </div>
             <button
@@ -152,7 +186,7 @@ export default function ProgressPage() {
               className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition-colors disabled:opacity-50"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Updating...' : 'Add Experience'}
+              {isSubmitting ? 'Updating...' : 'Update Experience'}
             </button>
           </div>
           
@@ -164,32 +198,36 @@ export default function ProgressPage() {
         </form>
 
         <div>
-          <h3 className="text-lg font-semibold mb-4">Skills in Current Level</h3>
+          <h3 className="text-lg font-semibold mb-4">
+            {progress.nextLevel ? `Skills in Level ${progress.nextLevel}` : 'No More Skills to Unlock'}
+          </h3>
           
-          {progress.unlockedSkills.length === 0 && progress.skillsToUnlock.length === 0 ? (
-            <p className="text-gray-600">No skills assigned to this level yet. Visit the Skill Tree page to assign skills.</p>
-          ) : (
+          {progress.skills && progress.skills.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {progress.unlockedSkills.map((skill) => (
-                <SkillItem
-                  key={skill.id}
-                  name={skill.name}
-                  imageUrl={skill.imageUrl}
-                  experienceNeeded={skill.experienceNeeded}
-                  isUnlocked={true}
-                />
-              ))}
-              
-              {progress.skillsToUnlock.map((skill) => (
-                <SkillItem
-                  key={skill.id}
-                  name={skill.name}
-                  imageUrl={skill.imageUrl}
-                  experienceNeeded={skill.experienceNeeded}
-                  isUnlocked={false}
-                />
+              {progress.skills.map((skill) => (
+                <div 
+                  key={skill.id} 
+                  className={`flex flex-col items-center p-2 ${skill.isUnlocked ? 'skill-glow' : ''}`}
+                >
+                  <div className="relative mb-2">
+                    <div className={`skill-emoji ${skill.isUnlocked ? 'skill-unlocked' : 'skill-locked'}`}>
+                      <span className="text-4xl">{skill.emoji || '❓'}</span>
+                    </div>
+                    <div className="absolute bottom-0 right-0 bg-blue-600 text-white text-xs px-1 rounded-tl-md">
+                      {skill.cumulativeExperienceNeeded} XP
+                    </div>
+                  </div>
+                  <span className="text-sm font-medium text-center">{skill.name}</span>
+                  <span className="text-xs text-gray-500 text-center">+{skill.experienceNeeded} XP</span>
+                </div>
               ))}
             </div>
+          ) : (
+            <p className="text-gray-600">
+              {progress.nextLevel 
+                ? `No skills assigned to Level ${progress.nextLevel} yet. Visit the Skill Tree page to assign skills.` 
+                : 'You have reached the maximum level! No more skills to unlock.'}
+            </p>
           )}
         </div>
       </div>
