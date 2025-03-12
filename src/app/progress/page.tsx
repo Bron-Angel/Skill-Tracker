@@ -212,7 +212,8 @@ export default function ProgressPage() {
 
     try {
       // Store current values before the update
-      const currentLevel = progress?.level;
+      // Convert undefined to null to match the expected type
+      const currentLevel = progress?.level ?? null;
       const currentUnlockedSkills = progress?.unlockedSkills ? 
         progress.unlockedSkills.map(skill => skill.id) : [];
       
