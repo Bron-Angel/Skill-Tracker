@@ -9,7 +9,8 @@ export async function GET() {
     if (!session?.user?.name || session.user.name !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
+    
+//Flex for Darby
     const skills = await db.skill.findMany();
 
     return NextResponse.json({ skills });

@@ -67,21 +67,29 @@ body {
   opacity: 0.6;
 }
 
+/* Special class for My Skills page - ensure unlocked skills have the pulse animation */
 .skill-glow {
   position: relative;
+  z-index: 1;
 }
 
 .skill-glow::before {
   content: '';
   position: absolute;
-  top: -5px;
-  left: -5px;
-  right: -5px;
-  bottom: -5px;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
   border-radius: 12px;
-  background: linear-gradient(45deg, #FF9500, #FFB347, #FF9500);
+  background: linear-gradient(45deg, #22c55e, #4ade80, #22c55e);
   z-index: -1;
-  animation: glow 2s ease-in-out infinite;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Make sure unlocked skills in the skills page are shown in full color */
+.skill-glow .skill-emoji {
+  filter: grayscale(0) !important;
+  opacity: 1 !important;
 }
 
 .draggable-skill {
@@ -151,4 +159,43 @@ body[data-mode="assign"] [id^="level-container-"] {
   100% {
     background-position: 0 0;
   }
+}
+
+/* Level Up Animation */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+  }
+  
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+.level-up-message {
+  animation: pulse 2s infinite;
+}
+
+/* Skill Unlock Animation */
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+  }
+}
+
+.skill-unlocked {
+  animation: glow 2s infinite;
 }

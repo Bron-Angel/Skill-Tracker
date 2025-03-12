@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { SkillItem } from '@/components/SkillItem';
+import { SkillsPageItem } from '@/components/SkillsPageItem';
 
 interface Skill {
   id: string;
@@ -11,6 +11,10 @@ interface Skill {
   experienceNeeded: number;
   emoji: string;
   isUnlocked: boolean;
+  levelId: string | null;
+  levelName: string | null;
+  levelNumber: number;
+  position: number;
 }
 
 export default function SkillsPage() {
@@ -39,6 +43,12 @@ export default function SkillsPage() {
       }
       const data = await response.json();
       console.log('User skills data:', data);
+      
+      // Log the skills with their level and position information for debugging
+      data.skills.forEach((skill: Skill) => {
+        console.log(`Skill: ${skill.name}, Level: ${skill.levelName || 'Unassigned'}, Position: ${skill.position}, Unlocked: ${skill.isUnlocked}`);
+      });
+      
       setSkills(data.skills);
     } catch (err) {
       console.error('Error fetching user skills:', err);
@@ -80,15 +90,16 @@ export default function SkillsPage() {
                 Total Skills: {skills.length} | Unlocked: {skills.filter(s => s.isUnlocked).length}
               </p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <div className="flex flex-wrap gap-6">
               {skills.map((skill) => (
-                <SkillItem
-                  key={skill.id}
-                  name={skill.name}
-                  emoji={skill.emoji}
-                  experienceNeeded={skill.experienceNeeded}
-                  isUnlocked={skill.isUnlocked}
-                />
+                <div key={skill.id} className="w-[100px]">
+                  <SkillsPageItem
+                    name={skill.name}
+                    emoji={skill.emoji}
+                    experienceNeeded={skill.experienceNeeded}
+                    isUnlocked={skill.isUnlocked}
+                  />
+                </div>
               ))}
             </div>
           </div>

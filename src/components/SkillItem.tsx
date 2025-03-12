@@ -30,7 +30,10 @@ export function SkillItem({
       data-skill-unlocked={isUnlocked ? 'true' : 'false'}
     >
       <div className="relative mb-2">
-        <div className={`skill-emoji ${isUnlocked ? 'skill-unlocked' : 'skill-locked'}`}>
+        <div 
+          className={`skill-emoji ${isUnlocked ? 'skill-unlocked' : 'skill-locked'}`}
+          style={isUnlocked ? { filter: 'grayscale(0)', opacity: 1 } : {}}
+        >
           <span className="text-4xl">{emoji || '❓'}</span>
         </div>
         <div className="absolute bottom-0 right-0 bg-blue-600 text-white text-xs px-1 rounded-tl-md">

@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { ExperienceBar } from '@/components/ExperienceBar';
 import { SkillItem } from '@/components/SkillItem';
+import Confetti from 'react-confetti';
+import { useWindowSize } from 'react-use';
 
 interface Skill {
   id: string;
@@ -44,6 +46,34 @@ export default function ProgressPage() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [experienceInput, setExperienceInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [newlyUnlockedSkills, setNewlyUnlockedSkills] = useState<string[]>([]);
+  const prevLevelRef = useRef<number | null>(null);
+  const prevUnlockedSkillsRef = useRef<string[]>([]);
+  const animationInProgressRef = useRef<boolean>(false);
+  const { width, height } = useWindowSize();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    // Create audio element for level up sound
+    try {
+      audioRef.current = new Audio('/level-up.mp3');
+      // Add error handling for the audio
+      audioRef.current.addEventListener('error', (e) => {
+        console.warn('Error loading level-up sound:', e);
+      });
+    } catch (err) {
+      console.warn('Could not create audio element:', err);
+    }
+    
+    return () => {
+      // Cleanup
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -52,6 +82,90 @@ export default function ProgressPage() {
       fetchUserProgress();
     }
   }, [status, router]);
+
+  // Effect to check for level up and trigger confetti
+  useEffect(() => {
+    if (!progress) return;
+    
+    console.log('Progress update detected:', { 
+      currentLevel: progress.level, 
+      previousLevel: prevLevelRef.current,
+      currentUnlockedSkills: progress.unlockedSkills?.length || 0,
+      previousUnlockedSkills: prevUnlockedSkillsRef.current?.length || 0,
+      animationInProgress: animationInProgressRef.current
+    });
+    
+    // Only check for level changes if we have a previous level to compare with
+    // AND no animation is currently in progress
+    if (prevLevelRef.current !== null && !animationInProgressRef.current) {
+      // Check for level up - ONLY trigger confetti for level changes
+      if (progress.level > prevLevelRef.current) {
+        // True level up detected!
+        console.log('LEVEL UP DETECTED! Showing confetti!', { 
+          from: prevLevelRef.current, 
+          to: progress.level 
+        });
+        
+        // Set the animation flag to prevent multiple animations
+        animationInProgressRef.current = true;
+        setShowConfetti(true);
+        
+        // Play level up sound
+        if (audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.play().catch(err => {
+            console.warn('Error playing level-up sound:', err);
+            // Continue with confetti even if sound fails
+          });
+        }
+        
+        // Hide confetti after 5 seconds and reset the animation flag
+        const timer = setTimeout(() => {
+          setShowConfetti(false);
+          animationInProgressRef.current = false;
+        }, 5000);
+        
+        return () => {
+          clearTimeout(timer);
+          animationInProgressRef.current = false;
+        };
+      }
+    }
+    
+    // Handle newly unlocked skills separately - NEVER trigger confetti for this
+    if (progress.unlockedSkills && prevUnlockedSkillsRef.current && !animationInProgressRef.current) {
+      const currentUnlockedIds = progress.unlockedSkills.map(skill => skill.id);
+      const previousUnlockedIds = prevUnlockedSkillsRef.current;
+      
+      // Find skills that are newly unlocked
+      const newlyUnlocked = currentUnlockedIds.filter(id => !previousUnlockedIds.includes(id));
+      
+      if (newlyUnlocked.length > 0) {
+        console.log('New skills unlocked, but NOT showing confetti:', newlyUnlocked);
+        
+        setNewlyUnlockedSkills(newlyUnlocked);
+        
+        // Clear the newly unlocked skills after 5 seconds
+        const timer = setTimeout(() => {
+          setNewlyUnlockedSkills([]);
+        }, 5000);
+        
+        return () => clearTimeout(timer);
+      }
+    }
+    
+    // Always update the refs at the end
+    prevLevelRef.current = progress.level;
+    prevUnlockedSkillsRef.current = progress.unlockedSkills ? progress.unlockedSkills.map(skill => skill.id) : [];
+  }, [progress]);
+
+  // Add a cleanup effect for the animation flag
+  useEffect(() => {
+    return () => {
+      // Reset animation flag when component unmounts
+      animationInProgressRef.current = false;
+    };
+  }, []);
 
   const fetchUserProgress = async () => {
     setIsLoading(true);
@@ -64,6 +178,17 @@ export default function ProgressPage() {
       }
       const data = await response.json();
       console.log('Progress data:', data);
+      
+      // Initialize the previous level and skills on first load
+      // This prevents false positives for level-up detection on initial load
+      if (prevLevelRef.current === null) {
+        prevLevelRef.current = data.level;
+      }
+      
+      if (prevUnlockedSkillsRef.current === null || prevUnlockedSkillsRef.current.length === 0) {
+        prevUnlockedSkillsRef.current = data.unlockedSkills ? data.unlockedSkills.map((skill: Skill) => skill.id) : [];
+      }
+      
       setProgress(data);
     } catch (err: any) {
       console.error('Error fetching progress:', err);
@@ -86,6 +211,11 @@ export default function ProgressPage() {
     setError('');
 
     try {
+      // Store current values before the update
+      const currentLevel = progress?.level;
+      const currentUnlockedSkills = progress?.unlockedSkills ? 
+        progress.unlockedSkills.map(skill => skill.id) : [];
+      
       const response = await fetch('/api/user/progress', {
         method: 'POST',
         headers: {
@@ -99,6 +229,13 @@ export default function ProgressPage() {
         throw new Error(errorData.error || 'Failed to update progress');
       }
 
+      // Update the previous level and skills references
+      // This ensures we correctly detect level changes
+      if (progress) {
+        prevLevelRef.current = currentLevel;
+        prevUnlockedSkillsRef.current = currentUnlockedSkills;
+      }
+
       await fetchUserProgress();
       setExperienceInput('');
     } catch (err: any) {
@@ -107,6 +244,33 @@ export default function ProgressPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const triggerLevelUpAnimation = () => {
+    // This function is only for testing the level-up animation
+    // Don't trigger if animation is already in progress
+    if (animationInProgressRef.current) {
+      console.log('Animation already in progress, ignoring test button click');
+      return;
+    }
+    
+    // Set the animation flag to prevent multiple animations
+    animationInProgressRef.current = true;
+    setShowConfetti(true);
+    
+    // Play level up sound
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(err => {
+        console.warn('Error playing level-up sound:', err);
+      });
+    }
+    
+    // Hide confetti after 5 seconds and reset the animation flag
+    setTimeout(() => {
+      setShowConfetti(false);
+      animationInProgressRef.current = false;
+    }, 5000);
   };
 
   if (isLoading) {
@@ -128,11 +292,46 @@ export default function ProgressPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {/* Confetti component that shows when leveling up */}
+      {showConfetti && (
+        <Confetti
+          width={width}
+          height={height}
+          recycle={false}
+          numberOfPieces={500}
+          gravity={0.2}
+        />
+      )}
+      
       <h1 className="text-2xl font-bold mb-6 text-center">Current Progress</h1>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
+        </div>
+      )}
+      
+      {/* Level up message - only shown when reaching a new level */}
+      {showConfetti && (
+        <div className="bg-green-100 border-2 border-green-400 text-green-800 px-4 py-3 rounded-lg mb-6 text-center level-up-message">
+          <h2 className="text-xl font-bold">
+            <span role="img" aria-label="celebration">🎉</span> Level Up! <span role="img" aria-label="celebration">🎉</span>
+          </h2>
+          <p className="font-medium">Congratulations! You've reached Level {progress?.level}!</p>
+          <p className="text-sm mt-1">You can now unlock new skills!</p>
+        </div>
+      )}
+      
+      {/* Hidden test button - only visible in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mb-4 text-right">
+          <button
+            onClick={triggerLevelUpAnimation}
+            className="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-2 py-1 rounded"
+            title="Test level up animation"
+          >
+            Test Level Up Animation
+          </button>
         </div>
       )}
       
@@ -207,7 +406,11 @@ export default function ProgressPage() {
               {progress.skills.map((skill) => (
                 <div 
                   key={skill.id} 
-                  className={`flex flex-col items-center p-2 ${skill.isUnlocked ? 'skill-glow' : ''}`}
+                  className={`flex flex-col items-center p-2 ${
+                    skill.isUnlocked ? 'skill-glow' : ''
+                  } ${
+                    newlyUnlockedSkills.includes(skill.id) ? 'skill-unlocked' : ''
+                  }`}
                 >
                   <div className="relative mb-2">
                     <div className={`skill-emoji ${skill.isUnlocked ? 'skill-unlocked' : 'skill-locked'}`}>
@@ -219,6 +422,9 @@ export default function ProgressPage() {
                   </div>
                   <span className="text-sm font-medium text-center">{skill.name}</span>
                   <span className="text-xs text-gray-500 text-center">+{skill.experienceNeeded} XP</span>
+                  {newlyUnlockedSkills.includes(skill.id) && (
+                    <span className="mt-1 text-xs font-bold text-green-600">Newly Unlocked!</span>
+                  )}
                 </div>
               ))}
             </div>
