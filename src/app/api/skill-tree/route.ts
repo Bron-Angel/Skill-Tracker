@@ -4,6 +4,9 @@ import { db } from '@/lib/jsonDb';
 import fs from 'fs/promises';
 import path from 'path';
 
+// Mark this route as dynamic to prevent static optimization errors
+export const dynamic = 'force-dynamic';
+
 // Define the data directory and file for user skill tree configuration
 const DATA_DIR = path.join(process.cwd(), 'data');
 const USER_SKILL_TREE_CONFIG_FILE = path.join(DATA_DIR, 'userSkillTreeConfig.json');

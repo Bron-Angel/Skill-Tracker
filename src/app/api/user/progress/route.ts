@@ -4,6 +4,9 @@ import { db } from '@/lib/jsonDb';
 import fs from 'fs/promises';
 import path from 'path';
 
+// Mark this route as dynamic to prevent static optimization errors
+export const dynamic = 'force-dynamic';
+
 // Helper function to read user experience data
 async function readUserExperience(username: string): Promise<{ level: number, experience: number }> {
   try {
